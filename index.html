@@ -503,7 +503,7 @@ textarea#code-editor {
       <div class="rail-label">Filter by topic</div>
       <div id="cat-buttons"></div>
       <div class="rail-divider"></div>
-      <div class="rail-label">97 concepts</div>
+      <div class="rail-label">102 concepts</div>
       <p class="rail-note">Every node is something a <b>5-year data engineer</b> should know cold. Lines show real conceptual links &mdash; drag nodes, scroll to zoom, click to open.</p>
     </aside>
     <div class="graph-canvas-wrap" id="graph-canvas-wrap">
@@ -518,7 +518,7 @@ textarea#code-editor {
       <div class="chat-scroll" id="chat-scroll">
         <div class="chat-intro" id="chat-intro">
           <div class="chat-intro-title">Ask about any Spark / Scala / PySpark / SQL / Python concept</div>
-          <div class="chat-intro-sub">Answers are assembled from the 97 concepts in this app's own knowledge base &mdash; not a live AI, so it only knows what's in here, but it understands rephrasings, typos, and follow-ups.</div>
+          <div class="chat-intro-sub">Answers are assembled from the 102 concepts in this app's own knowledge base &mdash; not a live AI, so it only knows what's in here, but it understands rephrasings, typos, and follow-ups.</div>
           <div class="chat-chips" id="chat-chips"></div>
         </div>
         <div id="chat-log"></div>
@@ -553,6 +553,170 @@ textarea#code-editor {
 </body>
 <script>
 const KB_NODES = [
+  {
+    id: "what-is-spark",
+    title: "What is Apache Spark",
+    category: "spark",
+    oneLiner: "A distributed compute engine that splits a large dataset into pieces and processes them in parallel across many machines.",
+    explanation: [
+      "Apache Spark is an open-source engine for processing large datasets across a cluster of machines instead of one. You write code that describes a computation (read this data, filter it, aggregate it, write the result), and Spark figures out how to split that work across many executors running in parallel.",
+      "It grew out of Hadoop MapReduce, keeping the same core idea (split data, compute in parallel, combine results) but keeping much more in memory between steps, which makes iterative and interactive workloads dramatically faster than MapReduce's disk-heavy model.",
+      "A Spark application has one driver process, which plans the work and coordinates, and many executor processes, which actually hold data partitions and run tasks. You interact with Spark mainly through the DataFrame/SQL API (declarative, optimized by Catalyst) or, less commonly today, the lower-level RDD API.",
+      "Spark isn't a database or a storage system — it reads from and writes to external stores (S3, HDFS, a warehouse, Kafka) and does the computation in between. It supports batch processing, streaming, SQL, and machine learning (MLlib) on the same engine.",
+      "In practice, 'using Spark' day to day means writing DataFrame transformations in PySpark, Scala, or Spark SQL, submitting that as a job, and reasoning about partitions, shuffles, and executor resources when it's slow — which is exactly what the rest of this concept map covers."
+    ],
+    example: {
+      lang: "python",
+      code: "from pyspark.sql import SparkSession\nspark = SparkSession.builder.appName(\"demo\").getOrCreate()\ndf = spark.read.parquet(\"s3://bucket/events/\")\ndf.filter(df.status == \"active\").groupBy(\"country\").count().show()"
+    },
+    gotcha: "Spark's laziness means nothing above actually runs until `.show()` (an action) is called — if a job seems to hang forever on a single line, it's usually the action at the end, not the transformation you're staring at.",
+    related: ["dataframe", "driver", "executor", "lazy-eval", "sparksession"],
+    diagram: {
+      type: "flow",
+      nodes: [
+        { id: "n1", label: "Your Code" },
+        { id: "n2", label: "Driver" },
+        { id: "n3", label: "Executors" },
+        { id: "n4", label: "Result" }
+      ],
+      edges: [
+        { from: "n1", to: "n2", label: "plans" },
+        { from: "n2", to: "n3", label: "assigns tasks" },
+        { from: "n3", to: "n4", label: "parallel compute" }
+      ]
+    }
+  },
+  {
+    id: "what-is-scala",
+    title: "What is Scala",
+    category: "scala",
+    oneLiner: "A JVM language blending object-oriented and functional programming — Spark itself is written in Scala.",
+    explanation: [
+      "Scala runs on the Java Virtual Machine and can call Java libraries directly, but its syntax and type system are built around functional programming: immutable values by default, first-class functions, and pattern matching, alongside full object-oriented classes and traits.",
+      "It matters to data engineers specifically because Spark's core engine is written in Scala — the Scala API is the 'native' one, other language APIs (PySpark, SparkR) are wrappers around it, which is part of why certain performance characteristics (like UDF overhead) differ between languages.",
+      "Scala's static type system catches many bugs at compile time that Python would only surface at runtime, at the cost of more upfront ceremony — case classes, sealed traits, and the compiler's type inference are the tools that make that trade-off pay off in a large codebase.",
+      "You'll mostly encounter Scala in a data engineering context either writing Spark jobs directly in it for performance-sensitive pipelines, or reading Spark's own source/stack traces, which are Scala.",
+      "It's not required to know Scala to use Spark well — most day-to-day work happens in PySpark or SQL — but understanding basic Scala idioms (case classes, Option, pattern matching) makes Spark's own APIs and error messages much less mysterious."
+    ],
+    example: {
+      lang: "scala",
+      code: "case class Event(id: Long, status: String, country: String)\nval df = spark.read.parquet(\"s3://bucket/events/\").as[Event]\ndf.filter(_.status == \"active\").groupBy(\"country\").count().show()"
+    },
+    gotcha: "Scala's implicit conversions and rich type inference are powerful but can make it genuinely hard to tell what type an expression has just by reading it — when debugging, don't hesitate to add explicit type annotations to narrow down where a mismatch is coming from.",
+    related: ["case-class", "option-type", "pattern-matching", "immutability", "trait"],
+    diagram: {
+      type: "layers",
+      nodes: [
+        { id: "n1", label: "Scala source" },
+        { id: "n2", label: "JVM bytecode" },
+        { id: "n3", label: "Runs on the JVM" }
+      ],
+      edges: [
+        { from: "n1", to: "n2", label: "compiles to" },
+        { from: "n2", to: "n3", label: "executes as" }
+      ]
+    }
+  },
+  {
+    id: "what-is-pyspark",
+    title: "What is PySpark",
+    category: "pyspark",
+    oneLiner: "The Python API for Spark — write ordinary Python, but the actual computation runs on the JVM-based Spark engine.",
+    explanation: [
+      "PySpark lets you write Spark jobs in Python instead of Scala. Your DataFrame code (`.filter()`, `.groupBy()`, `.select()`) gets translated into the same logical plan Scala Spark would build, then optimized and executed by the same JVM engine underneath — so DataFrame-level PySpark is usually just as fast as Scala Spark.",
+      "The catch is anything that needs actual Python code to run per-row (a Python UDF, `.rdd.map()` with a Python function) — that data has to cross the JVM/Python boundary via Py4J, get deserialized into a Python object, processed by a real Python interpreter, and serialized back, which is real overhead the pure-Scala path never pays.",
+      "PySpark is the dominant way most data engineers actually use Spark day to day, because it lets a Python-fluent team write pipelines without learning Scala, and it integrates naturally with the rest of the Python data ecosystem (pandas, numpy) at the edges of a job.",
+      "A PySpark session starts by creating a `SparkSession`, which is your entry point to reading data, running SQL, and building DataFrames — everything else in a typical PySpark script hangs off that one object.",
+      "Because of the cross-language boundary, PySpark-specific performance work (avoiding row-at-a-time Python UDFs, preferring Pandas/Arrow-vectorized UDFs, avoiding `.collect()` on big data) is its own skill on top of general Spark tuning."
+    ],
+    example: {
+      lang: "python",
+      code: "from pyspark.sql import SparkSession\nspark = SparkSession.builder.appName(\"demo\").getOrCreate()\ndf = spark.read.json(\"s3://bucket/logs/\")\nresult = df.groupBy(\"level\").count()\nresult.write.mode(\"overwrite\").parquet(\"s3://bucket/out/\")"
+    },
+    gotcha: "Reaching for `.rdd.map(lambda row: ...)` out of Python habit silently opts you out of Catalyst's optimizer and pays the Py4J serialization tax on every row — almost anything expressible as a DataFrame operation or a pandas UDF will be faster.",
+    related: ["sparksession", "py4j", "udf", "pandas-udf", "gil-pyspark"],
+    diagram: {
+      type: "compare",
+      leftTitle: "DataFrame API",
+      rightTitle: "Python UDF / RDD.map",
+      nodes: [
+        { id: "a-1", label: "Runs on JVM" },
+        { id: "a-2", label: "Catalyst-optimized" },
+        { id: "b-1", label: "Crosses to Python" },
+        { id: "b-2", label: "Py4J overhead per row" }
+      ],
+      edges: [
+        { from: "a-1", to: "a-2", label: "fast" },
+        { from: "b-1", to: "b-2", label: "slower" }
+      ]
+    }
+  },
+  {
+    id: "what-is-sql",
+    title: "What is SQL",
+    category: "sql",
+    oneLiner: "A declarative language for querying structured data — you describe what result you want, not how to compute it.",
+    explanation: [
+      "SQL (Structured Query Language) lets you ask questions of tabular data — filter rows, join tables, aggregate values — by describing the shape of the result you want. A query planner (Catalyst in Spark, or a database's own optimizer) decides the actual execution strategy, which is why the same SQL can run very differently depending on statistics, indexes, and data layout.",
+      "In a Spark context, Spark SQL is a first-class API alongside the DataFrame API — they compile down to the exact same underlying logical/physical plan, so `spark.sql(\"SELECT ...\")` and the equivalent chain of `.filter()`/`.groupBy()` calls are genuinely equivalent, not two separate engines.",
+      "SQL's core clauses (SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, JOIN) form a small, learnable vocabulary that covers the vast majority of real data engineering transformations, which is why so much pipeline logic ends up expressed in SQL even in a Python/Scala-heavy codebase.",
+      "Modern SQL used in analytics engineering goes well beyond basic filtering — window functions, CTEs, and MERGE/upsert statements handle problems (running totals, recursive-feeling queries, incremental loads) that would otherwise need a lot of imperative code.",
+      "The playground in this app runs real SQL against sample tables — a good place to try any of the clauses covered elsewhere in this knowledge base."
+    ],
+    example: {
+      lang: "sql",
+      code: "SELECT country, COUNT(*) AS active_users\nFROM events\nWHERE status = 'active'\nGROUP BY country\nHAVING COUNT(*) > 100\nORDER BY active_users DESC"
+    },
+    gotcha: "SQL's clauses read top-to-bottom (SELECT first) but execute in a different logical order (FROM/WHERE/GROUP BY/HAVING/SELECT/ORDER BY) — not knowing that order is the single most common source of 'why can't I filter on this alias' confusion.",
+    related: ["group-by-having", "join-types", "window-function", "query-plan", "catalyst"],
+    diagram: {
+      type: "flow",
+      nodes: [
+        { id: "n1", label: "FROM / JOIN" },
+        { id: "n2", label: "WHERE" },
+        { id: "n3", label: "GROUP BY" },
+        { id: "n4", label: "SELECT" }
+      ],
+      edges: [
+        { from: "n1", to: "n2", label: "" },
+        { from: "n2", to: "n3", label: "" },
+        { from: "n3", to: "n4", label: "" }
+      ]
+    }
+  },
+  {
+    id: "what-is-python",
+    title: "What is Python",
+    category: "python",
+    oneLiner: "A general-purpose, dynamically-typed language that's become the default glue and scripting language for data engineering.",
+    explanation: [
+      "Python is an interpreted, dynamically-typed language known for readable syntax and an enormous ecosystem of libraries — in data engineering specifically, it's the language most orchestration tools (Airflow), transformation frameworks (dbt's Python models), and PySpark jobs are written in.",
+      "Being dynamically typed means variables aren't declared with a fixed type, and type errors surface at runtime rather than compile time — fast to write, but it puts more weight on tests and type hints (see Type Hints) to catch mistakes early in a larger codebase.",
+      "CPython, the standard implementation, has a Global Interpreter Lock (GIL) that prevents true parallel execution of Python bytecode across threads in one process — a detail that matters a lot for PySpark specifically, since it shapes why UDFs have overhead and why multiprocessing (separate processes, not threads) is the usual way to get real Python-level parallelism.",
+      "Beyond PySpark, Python shows up constantly in data engineering as the language for orchestration DAGs, one-off scripts, data quality checks, and gluing together APIs — it's rarely the performance-critical inner loop (that's Spark's JVM engine or a database), more often the coordination layer around it.",
+      "The playground in this app runs a real (if scoped) Python interpreter — loops, functions, lists, dicts, comprehensions — a good place to try the language-level concepts covered elsewhere in this knowledge base."
+    ],
+    example: {
+      lang: "python",
+      code: "def normalize(rows):\n    return [r for r in rows if r.get(\"status\") == \"active\"]\n\nevents = [{\"status\": \"active\"}, {\"status\": \"inactive\"}]\nprint(normalize(events))"
+    },
+    gotcha: "Python's flexibility (duck typing, `*args`/`**kwargs`, monkey-patching) makes it easy to write code that works today and breaks in a confusing way when someone passes a slightly different shape of input six months later — type hints and validation at boundaries earn their keep in any pipeline code that outlives its first author.",
+    related: ["gil", "list-comprehension", "generator", "type-hints", "decorator"],
+    diagram: {
+      type: "tree",
+      nodes: [
+        { id: "n1", label: "Python" },
+        { id: "n2", label: "PySpark jobs" },
+        { id: "n3", label: "Orchestration (Airflow)" },
+        { id: "n4", label: "Scripts / glue" }
+      ],
+      edges: [
+        { from: "n1", to: "n2", label: "" },
+        { from: "n1", to: "n3", label: "" },
+        { from: "n1", to: "n4", label: "" }
+      ]
+    }
+  },
   {
     id: "partition",
     title: "Partition",
@@ -4453,6 +4617,12 @@ function stem(w) {
 
 const STOPWORDS = new Set(['what','is','the','a','an','does','do','how','why','explain','tell','me','about','between','and','difference','vs','versus','in','of','to','for','on','with','can','you','whats',"what's",'mean','meaning']);
 
+// bare topic-label words appear inside dozens of Spark-category titles (e.g. "spark.sql.
+// autoBroadcastJoinThreshold") without actually being about "what is Spark" — so on their own
+// they must NOT count as a title-word match, or a generic query like "spark" or "python" latches
+// onto whatever unrelated node happens to mention the word in its title
+const GENERIC_TOPIC_WORDS = new Set(['spark', 'python', 'sql', 'scala', 'pyspark']);
+
 // minimum edit distance allowed, scaled to word length — short words need an exact/near-exact
 // hit (typo tolerance on a 4-letter word is too likely to collide with an unrelated word),
 // longer words can absorb one or two real typos safely
@@ -4489,6 +4659,15 @@ function findMatches(rawQuery) {
 
     words.forEach(w => {
       if (w.length < 3) return;
+      if (GENERIC_TOPIC_WORDS.has(w)) {
+        // a bare topic label ("spark", "python"...) shouldn't crown some unrelated node just
+        // because the word happens to appear in its title — EXCEPT the one node that is
+        // actually a top-level "what is X" primer for that exact topic, which is the correct
+        // answer to a bare "what is spark"-style query
+        if (entry.n.id === 'what-is-' + w) { score += 60; hasSolidHit = true; return; }
+        if (titleWords.includes(w)) score += 4;
+        return;
+      }
       // a query word landing on one of THIS node's own title/id words is the strongest signal —
       // this is what makes single-word queries like "cache" prefer the Caching node over any
       // node that merely mentions caching in passing while explaining something else
@@ -4544,6 +4723,40 @@ function goToNode(id) {
   openDetail(id);
 }
 
+function renderPlainMessage(text) {
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg assistant';
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble';
+  const p = document.createElement('p');
+  p.textContent = text;
+  bubble.appendChild(p);
+  msg.appendChild(bubble);
+  chatLog.appendChild(msg);
+  scrollChatToBottom();
+}
+
+/* ---- small-talk / conversational intent, handled before any KB lookup ---- */
+function detectSmallTalk(rawQuery) {
+  const q = normalizeQuery(rawQuery).replace(/[^a-z0-9 ]/g, '').trim();
+  if (/^(hi|hey|hello|yo|sup|hiya|howdy)( there)?!?$/.test(q)) {
+    return "Hi! Ask me about any Spark, Scala, PySpark, SQL, or Python concept — e.g. “what's a broadcast join” or “explain the GIL”.";
+  }
+  if (/^(how are you|how('?s| is) it going|what'?s up|whats up)\??$/.test(q)) {
+    return "Doing well — ready when you are. Ask about anything from the 102 concepts in here.";
+  }
+  if (/^(thanks|thank you|thx|ty|cheers|appreciate it)!?$/.test(q)) {
+    return "You're welcome! Anything else you want explained?";
+  }
+  if (/^(bye|goodbye|see ya|later)!?$/.test(q)) {
+    return "See you around — the concept map and playground will still be here.";
+  }
+  if (/^(who are you|what are you|what is this)\??$/.test(q)) {
+    return "I'm a local search assistant built into this app — I answer from its own 97-concept knowledge base on Spark, Scala, PySpark, SQL, and Python. I'm not a general AI, so I only know what's written up in here.";
+  }
+  return null;
+}
+
 function renderAssistantAnswer(rawQuery, matches) {
   const msg = document.createElement('div');
   msg.className = 'chat-msg assistant';
@@ -4552,7 +4765,7 @@ function renderAssistantAnswer(rawQuery, matches) {
 
   if (!matches.length) {
     bubble.innerHTML =
-      '<p class="chat-no-match">I couldn\'t find anything in the 97 concepts for that. This assistant only answers from this app\'s own knowledge base &mdash; try a more specific term like &ldquo;shuffle&rdquo;, &ldquo;window function&rdquo;, or &ldquo;GIL&rdquo;.</p>';
+      '<p class="chat-no-match">I couldn\'t find anything in the 102 concepts for that. This assistant only answers from this app\'s own knowledge base &mdash; try a more specific term like &ldquo;shuffle&rdquo;, &ldquo;window function&rdquo;, or &ldquo;GIL&rdquo;.</p>';
     msg.appendChild(bubble);
     chatLog.appendChild(msg);
     scrollChatToBottom();
@@ -4632,8 +4845,13 @@ function askQuestion(text) {
   text = text.trim();
   if (!text) return;
   addUserMessage(text);
-  const matches = findMatches(text);
-  renderAssistantAnswer(text, matches);
+  const smallTalk = detectSmallTalk(text);
+  if (smallTalk) {
+    renderPlainMessage(smallTalk);
+  } else {
+    const matches = findMatches(text);
+    renderAssistantAnswer(text, matches);
+  }
   chatInput.value = '';
 }
 
