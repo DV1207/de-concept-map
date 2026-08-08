@@ -518,7 +518,7 @@ textarea#code-editor {
       <div class="chat-scroll" id="chat-scroll">
         <div class="chat-intro" id="chat-intro">
           <div class="chat-intro-title">Ask about any Spark / Scala / PySpark / SQL / Python concept</div>
-          <div class="chat-intro-sub">Answers are assembled from the 102 concepts in this app's own knowledge base &mdash; not a live AI, so it only knows what's in here, but it understands rephrasings, typos, and follow-ups.</div>
+          <div class="chat-intro-sub" id="chat-intro-sub">Answers are assembled from the 102 concepts in this app's own knowledge base &mdash; not a live AI, so it only knows what's in here, but it understands rephrasings, typos, and follow-ups.</div>
           <div class="chat-chips" id="chat-chips"></div>
         </div>
         <div id="chat-log"></div>
@@ -4841,18 +4841,87 @@ function renderAssistantAnswer(rawQuery, matches) {
   scrollChatToBottom();
 }
 
-function askQuestion(text) {
+// Cloudflare Worker endpoint for live AI answers (Workers AI, free tier).
+// Set after running `wrangler deploy` in worker/ — until then this stays a placeholder
+// and the assistant silently falls back to the local knowledge-base matcher below.
+const AI_WORKER_URL = 'https://de-concept-map-ai.YOUR-SUBDOMAIN.workers.dev';
+const AI_ENABLED = !AI_WORKER_URL.includes('YOUR-SUBDOMAIN');
+if (AI_ENABLED) {
+  const introSub = document.getElementById('chat-intro-sub');
+  if (introSub) introSub.textContent = 'Answers come from a live AI model (Cloudflare Workers AI), with this app’s own 102-concept knowledge base as a fallback if the live model is unreachable.';
+}
+
+function addLoadingMessage() {
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg assistant';
+  msg.dataset.loading = 'true';
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble';
+  bubble.innerHTML = '<p style="color:var(--ink-faint)">Thinking…</p>';
+  msg.appendChild(bubble);
+  chatLog.appendChild(msg);
+  scrollChatToBottom();
+  return msg;
+}
+
+async function askAI(question) {
+  const res = await fetch(AI_WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question })
+  });
+  if (!res.ok) throw new Error('worker responded ' + res.status);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  if (!data.answer) throw new Error('empty response');
+  return data.answer;
+}
+
+function renderAIAnswer(text) {
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg assistant';
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble';
+  const badge = document.createElement('div');
+  badge.className = 'chat-answer-head';
+  badge.innerHTML = '<span class="chat-answer-cat" style="background:var(--cat-python-soft);color:var(--cat-python)">LIVE AI</span>';
+  bubble.appendChild(badge);
+  const p = document.createElement('p');
+  p.textContent = text;
+  bubble.appendChild(p);
+  msg.appendChild(bubble);
+  chatLog.appendChild(msg);
+  scrollChatToBottom();
+}
+
+async function askQuestion(text) {
   text = text.trim();
   if (!text) return;
   addUserMessage(text);
+  chatInput.value = '';
+
   const smallTalk = detectSmallTalk(text);
   if (smallTalk) {
     renderPlainMessage(smallTalk);
-  } else {
-    const matches = findMatches(text);
-    renderAssistantAnswer(text, matches);
+    return;
   }
-  chatInput.value = '';
+
+  if (AI_ENABLED) {
+    const loadingMsg = addLoadingMessage();
+    try {
+      const answer = await askAI(text);
+      loadingMsg.remove();
+      renderAIAnswer(answer);
+      return;
+    } catch (err) {
+      loadingMsg.remove();
+      // fall through to the local knowledge-base matcher below — keeps the assistant
+      // working even if the Worker is down, unreachable, or the daily free quota is spent
+    }
+  }
+
+  const matches = findMatches(text);
+  renderAssistantAnswer(text, matches);
 }
 
 function renderStarterChips() {
