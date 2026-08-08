@@ -347,51 +347,75 @@ pre.code-block {
 }
 .node-chip:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ============ search screen ============ */
-#screen-search { justify-content: center; overflow-y: auto; padding: 40px 20px 60px; }
-.search-wrap { width: 100%; max-width: 720px; margin: 0 auto; }
-.search-box {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--bg-raised); border: 1.5px solid var(--line-strong);
-  border-radius: 12px; padding: 12px 16px;
-  box-shadow: var(--shadow);
-}
-.search-box:focus-within { border-color: var(--accent); }
-.search-box input {
-  flex: 1; border: none; outline: none; background: none;
-  font-size: 16px; font-family: var(--font-body); color: var(--ink);
-}
-.search-box input::placeholder { color: var(--ink-faint); }
-.search-icon { color: var(--ink-faint); flex: none; }
-.search-kbd {
-  font-family: var(--font-display); font-size: 10.5px; color: var(--ink-faint);
-  border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px;
-}
+/* ============ chat assistant screen ============ */
+#screen-search { flex-direction: column; align-items: center; overflow: hidden; padding: 0; }
+.chat-wrap { width: 100%; max-width: 760px; height: 100%; display: flex; flex-direction: column; margin: 0 auto; }
+.chat-scroll { flex: 1; overflow-y: auto; padding: 28px 20px 12px; }
 
-.search-empty { text-align: center; padding: 70px 20px 20px; color: var(--ink-faint); }
-.search-empty .big { font-size: 15px; color: var(--ink-dim); margin-bottom: 6px; }
-.search-empty .small { font-size: 12.5px; }
-.search-chips { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-top: 18px; }
+.chat-intro { text-align: center; padding: 40px 20px 24px; }
+.chat-intro-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 8px; text-wrap: balance; }
+.chat-intro-sub { font-size: 12.5px; color: var(--ink-faint); line-height: 1.55; max-width: 480px; margin: 0 auto; }
+.chat-chips { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-top: 18px; }
 
-.result-card {
-  display: block; width: 100%; text-align: left;
+.chat-msg { display: flex; margin-bottom: 16px; }
+.chat-msg.user { justify-content: flex-end; }
+.chat-msg.assistant { justify-content: flex-start; }
+.chat-bubble {
+  max-width: 88%; border-radius: 14px; padding: 12px 15px;
+  font-size: 13.5px; line-height: 1.6;
+}
+.chat-msg.user .chat-bubble {
+  background: var(--accent); color: var(--accent-ink);
+  border-bottom-right-radius: 4px;
+  font-weight: 600;
+}
+.chat-msg.assistant .chat-bubble {
   background: var(--bg-raised); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 14px 16px; margin-top: 12px;
-  cursor: pointer; transition: border-color 0.15s, transform 0.1s;
+  border-bottom-left-radius: 4px;
+  color: var(--ink); width: 100%;
 }
-.result-card:hover { border-color: var(--line-strong); transform: translateY(-1px); }
-.result-top { display: flex; align-items: center; gap: 9px; margin-bottom: 6px; }
-.result-title { font-size: 15px; font-weight: 700; }
-.result-cat {
+.chat-bubble p { margin: 0 0 10px; }
+.chat-bubble p:last-child { margin-bottom: 0; }
+.chat-answer-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.chat-answer-cat {
   font-family: var(--font-display); font-size: 9.5px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.06em;
   padding: 2px 7px; border-radius: 4px;
 }
-.result-oneliner { font-size: 13px; color: var(--ink-dim); line-height: 1.5; margin: 0 0 6px; }
-.result-snippet { font-size: 12.5px; color: var(--ink-faint); line-height: 1.5; margin: 0; }
-.result-snippet mark { background: var(--cat-python-soft); color: var(--ink); border-radius: 2px; padding: 0 1px; }
+.chat-answer-title { font-size: 14.5px; font-weight: 700; }
+.chat-gotcha {
+  border-left: 3px solid var(--warn); background: var(--bg-sunken);
+  border-radius: 6px; padding: 8px 10px; font-size: 12.5px; margin-top: 8px;
+}
+.chat-gotcha b { color: var(--warn); font-family: var(--font-display); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 3px; }
+.chat-open-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-display); font-size: 11px; font-weight: 700;
+  color: var(--accent); background: none; border: none; cursor: pointer;
+  padding: 8px 0 0; margin: 0;
+}
+.chat-open-btn:hover { text-decoration: underline; }
+.chat-followups { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chat-no-match { color: var(--ink-faint); font-style: italic; }
 
-.results-count { font-size: 11.5px; color: var(--ink-faint); margin: 18px 2px 0; font-family: var(--font-display); }
+.chat-input-row {
+  display: flex; gap: 8px; align-items: center;
+  padding: 14px 20px; border-top: 1px solid var(--line);
+  background: var(--bg-raised); flex: none;
+}
+.chat-input-row input {
+  flex: 1; border: 1.5px solid var(--line-strong); border-radius: 10px;
+  padding: 11px 14px; font-size: 14px; font-family: var(--font-body);
+  background: var(--bg-sunken); color: var(--ink); outline: none;
+}
+.chat-input-row input:focus { border-color: var(--accent); }
+.chat-input-row input::placeholder { color: var(--ink-faint); }
+.chat-send-btn {
+  width: 40px; height: 40px; border-radius: 10px; border: none; flex: none;
+  background: var(--accent); color: var(--accent-ink); cursor: pointer;
+  font-size: 17px; display: flex; align-items: center; justify-content: center;
+}
+.chat-send-btn:hover { filter: brightness(1.08); }
 
 /* ============ playground screen ============ */
 #screen-play { flex-direction: column; }
@@ -490,13 +514,19 @@ textarea#code-editor {
   </div>
 
   <div class="screen" id="screen-search">
-    <div class="search-wrap">
-      <div class="search-box">
-        <svg class="search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="search-input" type="text" placeholder="Ask a doubt &mdash; e.g. PARTITION, shuffle, GIL, window function..." autocomplete="off" />
-        <span class="search-kbd">instant</span>
+    <div class="chat-wrap">
+      <div class="chat-scroll" id="chat-scroll">
+        <div class="chat-intro" id="chat-intro">
+          <div class="chat-intro-title">Ask about any Spark / Scala / PySpark / SQL / Python concept</div>
+          <div class="chat-intro-sub">Answers are assembled from the 97 concepts in this app's own knowledge base &mdash; not a live AI, so it only knows what's in here, but it understands rephrasings, typos, and follow-ups.</div>
+          <div class="chat-chips" id="chat-chips"></div>
+        </div>
+        <div id="chat-log"></div>
       </div>
-      <div id="search-results"></div>
+      <form class="chat-input-row" id="chat-form">
+        <input id="chat-input" type="text" placeholder="e.g. what's the difference between coalesce and repartition?" autocomplete="off" />
+        <button type="submit" class="chat-send-btn" aria-label="Send">&#8594;</button>
+      </form>
     </div>
   </div>
 
@@ -3650,7 +3680,7 @@ tabs.forEach(tab => {
     tab.classList.add('active');
     const target = tab.dataset.screen;
     screens.forEach(s => s.classList.toggle('active', s.id === 'screen-' + target));
-    if (target === 'search') document.getElementById('search-input').focus();
+    if (target === 'search') document.getElementById('chat-input').focus();
     if (target === 'graph') resizeGraph();
   });
 });
@@ -4348,10 +4378,13 @@ function closeDetail() {
 'use strict';
 
 /* ============================================================
-   search screen
+   chat-style assistant — fuzzy/synonym matching over the local KB
    ============================================================ */
-const searchInput = document.getElementById('search-input');
-const searchResults = document.getElementById('search-results');
+const chatInput = document.getElementById('chat-input');
+const chatForm = document.getElementById('chat-form');
+const chatLog = document.getElementById('chat-log');
+const chatScroll = document.getElementById('chat-scroll');
+const chatIntro = document.getElementById('chat-intro');
 
 // build a search index: title, oneLiner, explanation text, id
 const SEARCH_INDEX = KB_NODES.map(n => ({
@@ -4359,90 +4392,275 @@ const SEARCH_INDEX = KB_NODES.map(n => ({
   hay: (n.title + ' ' + n.id + ' ' + n.oneLiner + ' ' + n.explanation.join(' ') + ' ' + (n.gotcha||'')).toLowerCase()
 }));
 
-function highlightMatch(text, q) {
-  if (!q) return esc(text);
-  const idx = text.toLowerCase().indexOf(q.toLowerCase());
-  if (idx === -1) return esc(text);
-  return esc(text.slice(0, idx)) + '<mark>' + esc(text.slice(idx, idx+q.length)) + '</mark>' + esc(text.slice(idx+q.length));
+// small synonym/alias map so common rephrasings still land on the right concept
+const ALIASES = {
+  'partitioning': 'partition', 'partitions': 'partition',
+  'repartitioning': 'coalesce-repartition', 'repartition': 'coalesce-repartition', 'coalesce': 'coalesce-repartition',
+  'shuffling': 'shuffle', 'shuffles': 'shuffle',
+  'gil': 'gil', 'global interpreter lock': 'gil',
+  'udfs': 'udf', 'user defined function': 'udf', 'user-defined function': 'udf',
+  'aqe': 'aqe', 'adaptive query execution': 'aqe',
+  'skewed': 'skew', 'skewing': 'skew', 'data skew': 'skew',
+  'broadcast joins': 'broadcast-join',
+  'window functions': 'window-function', 'windowing': 'window-function',
+  'joins': 'join-types', 'join types': 'join-types',
+  'merge into': 'merge-upsert', 'upsert': 'merge-upsert', 'upserts': 'merge-upsert',
+  'explain()': 'explain-plan', 'physical plan': 'explain-plan', 'logical plan': 'explain-plan',
+  'query plan': 'query-plan', 'execution plan': 'query-plan',
+  'cte': 'cte', 'common table expression': 'cte',
+  'lazy evaluation': 'lazy-eval', 'laziness': 'lazy-eval',
+  'persist': 'caching',
+  'oom': 'oom-tuning', 'out of memory': 'oom-tuning',
+  'multiprocessing vs threading': 'multiprocessing-vs-threading',
+  'dataclass': 'dataclasses', 'dataclasses': 'dataclasses',
+  'type hint': 'type-hints', 'type hints': 'type-hints',
+  'scd': 'scd', 'slowly changing dimension': 'scd',
+  'cdc': 'cdc', 'change data capture': 'cdc',
+  'z order': 'z-ordering', 'zorder': 'z-ordering', 'z-order': 'z-ordering'
+};
+
+// Levenshtein distance, capped, for typo tolerance on short tokens
+function editDistance(a, b, maxD) {
+  if (Math.abs(a.length - b.length) > maxD) return maxD + 1;
+  const dp = Array.from({length: a.length + 1}, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[a.length][b.length];
 }
 
-function findSnippet(n, q) {
-  const ql = q.toLowerCase();
+function normalizeQuery(q) {
+  return q.toLowerCase().replace(/[?.,!]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// light stemming so "cache"/"caching"/"cached" and similar common suffix variants line up
+// against title words without needing every inflection spelled out — deliberately conservative,
+// only strips a handful of very common English suffixes
+// a handful of specific silent-e "-ing" words that come up often enough in this KB to be
+// worth naming directly, rather than a general (and easy to get subtly wrong) silent-e rule
+const ING_SILENT_E = { caching: 'cache', coalescing: 'coalesce' };
+function stem(w) {
+  if (ING_SILENT_E[w]) return ING_SILENT_E[w];
+  if (w.length > 5 && w.endsWith('ing')) return w.slice(0, -3);
+  if (w.length > 4 && w.endsWith('ed')) return w.slice(0, -2);
+  if (w.length > 4 && w.endsWith('es')) return w.slice(0, -2);
+  if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss')) return w.slice(0, -1);
+  return w;
+}
+
+const STOPWORDS = new Set(['what','is','the','a','an','does','do','how','why','explain','tell','me','about','between','and','difference','vs','versus','in','of','to','for','on','with','can','you','whats',"what's",'mean','meaning']);
+
+// minimum edit distance allowed, scaled to word length — short words need an exact/near-exact
+// hit (typo tolerance on a 4-letter word is too likely to collide with an unrelated word),
+// longer words can absorb one or two real typos safely
+function fuzzyBudget(len) {
+  if (len <= 4) return 0;
+  if (len <= 6) return 1;
+  return 2;
+}
+
+function findMatches(rawQuery) {
+  const q = normalizeQuery(rawQuery);
+  if (!q) return [];
+
+  const words = q.split(' ').filter(w => w && !STOPWORDS.has(w));
+  if (!words.length) return [];
+
+  const aliasIds = new Set();
+  Object.entries(ALIASES).forEach(([alias, id]) => { if (q.includes(alias)) aliasIds.add(id); });
+
+  const scored = SEARCH_INDEX.map(entry => {
+    let score = 0;
+    let hasSolidHit = false; // exact/substring/alias/title-word hit — a mere mention in the
+                             // explanation body must never be enough on its own to answer with this node
+    const titleL = entry.n.title.toLowerCase();
+    const idWords = entry.n.id.replace(/-/g, ' ');
+    const titleWords = (titleL + ' ' + idWords).split(/[^a-z0-9]+/).filter(Boolean);
+    const titleStems = new Set(titleWords.map(stem));
+
+    if (titleL === q) { score += 120; hasSolidHit = true; }
+    else if (titleL.startsWith(q)) { score += 60; hasSolidHit = true; }
+    else if (titleL.includes(q)) { score += 35; hasSolidHit = true; }
+    if (aliasIds.has(entry.n.id)) { score += 45; hasSolidHit = true; }
+    if (idWords === words.join(' ')) { score += 40; hasSolidHit = true; }
+
+    words.forEach(w => {
+      if (w.length < 3) return;
+      // a query word landing on one of THIS node's own title/id words is the strongest signal —
+      // this is what makes single-word queries like "cache" prefer the Caching node over any
+      // node that merely mentions caching in passing while explaining something else
+      if (titleWords.includes(w) || titleStems.has(stem(w))) { score += 25; hasSolidHit = true; return; }
+      if (entry.hay.includes(w)) { score += 3; return; } // mention only — never solid on its own
+      // fuzzy: only against this node's OWN title/id words, and only within a length-scaled budget
+      const budget = fuzzyBudget(w.length);
+      if (budget > 0) {
+        for (const tw of titleWords) {
+          if (tw.length < 4) continue;
+          if (editDistance(w, tw, budget) <= budget) { score += 20; hasSolidHit = true; break; }
+        }
+      }
+    });
+
+    return { n: entry.n, score, hasSolidHit };
+  })
+    // require a real signal (title/id/alias hit, or a title-word fuzzy/exact match) — plain
+    // mentions inside the explanation body are context, not evidence this node IS the answer
+    .filter(x => x.hasSolidHit)
+    .sort((a, b) => b.score - a.score);
+
+  return scored.slice(0, 3).map(x => x.n);
+}
+
+function findSnippet(n, words) {
   for (const p of n.explanation) {
-    if (p.toLowerCase().includes(ql)) return p;
+    const pl = p.toLowerCase();
+    if (words.some(w => w.length >= 3 && pl.includes(w))) return p;
   }
   return n.explanation[0];
 }
 
-function renderEmptyState() {
-  const popular = ['partition', 'shuffle', 'window-function', 'gil', 'udf', 'catalyst', 'join-types', 'case-class'];
-  searchResults.innerHTML =
-    '<div class="search-empty">' +
-      '<div class="big">Type a term to get an instant, grounded explanation.</div>' +
-      '<div class="small">Searches titles, definitions and full explanations across all 97 concepts.</div>' +
-      '<div class="search-chips" id="search-chips"></div>' +
-    '</div>';
-  const chipsEl = document.getElementById('search-chips');
-  popular.forEach(id => {
-    const n = NODE_BY_ID[id];
+/* ---- chat rendering ---- */
+function scrollChatToBottom() {
+  requestAnimationFrame(() => { chatScroll.scrollTop = chatScroll.scrollHeight; });
+}
+
+function addUserMessage(text) {
+  chatIntro.style.display = 'none';
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg user';
+  msg.innerHTML = '<div class="chat-bubble"></div>';
+  msg.querySelector('.chat-bubble').textContent = text;
+  chatLog.appendChild(msg);
+  scrollChatToBottom();
+}
+
+function goToNode(id) {
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.screen === 'graph'));
+  screens.forEach(s => s.classList.toggle('active', s.id === 'screen-graph'));
+  resizeGraph();
+  openDetail(id);
+}
+
+function renderAssistantAnswer(rawQuery, matches) {
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg assistant';
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble';
+
+  if (!matches.length) {
+    bubble.innerHTML =
+      '<p class="chat-no-match">I couldn\'t find anything in the 97 concepts for that. This assistant only answers from this app\'s own knowledge base &mdash; try a more specific term like &ldquo;shuffle&rdquo;, &ldquo;window function&rdquo;, or &ldquo;GIL&rdquo;.</p>';
+    msg.appendChild(bubble);
+    chatLog.appendChild(msg);
+    scrollChatToBottom();
+    return;
+  }
+
+  const words = normalizeQuery(rawQuery).split(' ').filter(Boolean);
+  const primary = matches[0];
+  const cc = catColor(primary.category), cs = catSoftColor(primary.category);
+
+  const head = document.createElement('div');
+  head.className = 'chat-answer-head';
+  head.innerHTML =
+    '<span class="chat-answer-cat" style="background:' + cs + ';color:' + cc + '">' + CATS[primary.category].label + '</span>' +
+    '<span class="chat-answer-title">' + esc(primary.title) + '</span>';
+  bubble.appendChild(head);
+
+  const oneLinerP = document.createElement('p');
+  oneLinerP.textContent = primary.oneLiner;
+  bubble.appendChild(oneLinerP);
+
+  const snippetP = document.createElement('p');
+  snippetP.textContent = findSnippet(primary, words);
+  bubble.appendChild(snippetP);
+
+  if (primary.gotcha) {
+    const gotchaBox = document.createElement('div');
+    gotchaBox.className = 'chat-gotcha';
+    gotchaBox.innerHTML = '<b>Watch out</b>';
+    gotchaBox.appendChild(document.createTextNode(primary.gotcha));
+    bubble.appendChild(gotchaBox);
+  }
+
+  const openBtn = document.createElement('button');
+  openBtn.className = 'chat-open-btn';
+  openBtn.textContent = 'Open full explanation + diagram →';
+  openBtn.addEventListener('click', () => goToNode(primary.id));
+  bubble.appendChild(openBtn);
+
+  // if the question plausibly touched a second concept (e.g. "difference between X and Y"), show it too
+  if (matches.length > 1) {
+    const also = document.createElement('p');
+    also.style.marginTop = '10px';
+    also.style.fontSize = '12px';
+    also.style.color = 'var(--ink-faint)';
+    also.textContent = 'Also relevant:';
+    bubble.appendChild(also);
+  }
+
+  // follow-up chips: related concepts of the primary match, plus any secondary matches
+  const followIds = [];
+  matches.slice(1).forEach(m => { if (!followIds.includes(m.id)) followIds.push(m.id); });
+  (primary.related || []).forEach(rid => { if (!followIds.includes(rid) && NODE_BY_ID[rid]) followIds.push(rid); });
+
+  if (followIds.length) {
+    const followRow = document.createElement('div');
+    followRow.className = 'chat-followups';
+    followIds.slice(0, 6).forEach(rid => {
+      const rn = NODE_BY_ID[rid];
+      if (!rn) return;
+      const chip = document.createElement('button');
+      chip.className = 'node-chip';
+      chip.style.color = catColor(rn.category);
+      chip.textContent = rn.title;
+      chip.addEventListener('click', () => askQuestion(rn.title));
+      followRow.appendChild(chip);
+    });
+    bubble.appendChild(followRow);
+  }
+
+  msg.appendChild(bubble);
+  chatLog.appendChild(msg);
+  scrollChatToBottom();
+}
+
+function askQuestion(text) {
+  text = text.trim();
+  if (!text) return;
+  addUserMessage(text);
+  const matches = findMatches(text);
+  renderAssistantAnswer(text, matches);
+  chatInput.value = '';
+}
+
+function renderStarterChips() {
+  const starters = [
+    "what's the difference between coalesce and repartition?",
+    'explain shuffle',
+    'window function',
+    'GIL impact on pyspark',
+    'MERGE vs upsert',
+    'case class'
+  ];
+  const chipsEl = document.getElementById('chat-chips');
+  starters.forEach(s => {
     const chip = document.createElement('button');
     chip.className = 'node-chip';
-    chip.style.color = catColor(n.category);
-    chip.textContent = n.title;
-    chip.addEventListener('click', () => { searchInput.value = n.title; runSearch(n.title); });
+    chip.textContent = s;
+    chip.addEventListener('click', () => askQuestion(s));
     chipsEl.appendChild(chip);
   });
 }
 
-function runSearch(q) {
-  q = q.trim();
-  if (!q) { renderEmptyState(); return; }
-  const ql = q.toLowerCase();
-  const scored = SEARCH_INDEX.map(entry => {
-    let score = 0;
-    const titleL = entry.n.title.toLowerCase();
-    if (titleL === ql) score += 100;
-    else if (titleL.startsWith(ql)) score += 50;
-    else if (titleL.includes(ql)) score += 25;
-    if (entry.n.id.includes(ql.replace(/\s+/g,'-'))) score += 20;
-    if (entry.hay.includes(ql)) score += 5;
-    // word-boundary bonus
-    const words = ql.split(/\s+/).filter(Boolean);
-    words.forEach(w => { if (entry.hay.includes(w)) score += 2; });
-    return { entry, score };
-  }).filter(x => x.score > 0).sort((a,b) => b.score - a.score);
-
-  if (!scored.length) {
-    searchResults.innerHTML =
-      '<div class="search-empty"><div class="big">No concept matches &ldquo;' + esc(q) + '&rdquo;.</div>' +
-      '<div class="small">Try a shorter term, e.g. &ldquo;shuffle&rdquo; or &ldquo;UDF&rdquo;.</div></div>';
-    return;
-  }
-
-  searchResults.innerHTML = '<div class="results-count">' + scored.length + ' match' + (scored.length===1?'':'es') + '</div>';
-  scored.slice(0, 25).forEach(({entry}) => {
-    const n = entry.n;
-    const card = document.createElement('div');
-    card.className = 'result-card';
-    card.innerHTML =
-      '<div class="result-top">' +
-        '<span class="result-title">' + highlightMatch(n.title, q) + '</span>' +
-        '<span class="result-cat" style="background:' + catSoftColor(n.category) + ';color:' + catColor(n.category) + '">' + CATS[n.category].label + '</span>' +
-      '</div>' +
-      '<p class="result-oneliner">' + esc(n.oneLiner) + '</p>' +
-      '<p class="result-snippet">' + highlightMatch(findSnippet(n, q), q) + '</p>';
-    card.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.toggle('active', t.dataset.screen === 'graph'));
-      screens.forEach(s => s.classList.toggle('active', s.id === 'screen-graph'));
-      resizeGraph();
-      openDetail(n.id);
-    });
-    searchResults.appendChild(card);
-  });
-}
-
-renderEmptyState();
-searchInput.addEventListener('input', () => runSearch(searchInput.value));
+renderStarterChips();
+chatForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  askQuestion(chatInput.value);
+});
 </script>
 <script>
 // ============================================================================
