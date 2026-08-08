@@ -4842,9 +4842,7 @@ function renderAssistantAnswer(rawQuery, matches) {
 }
 
 // Cloudflare Worker endpoint for live AI answers (Workers AI, free tier).
-// Set after running `wrangler deploy` in worker/ — until then this stays a placeholder
-// and the assistant silently falls back to the local knowledge-base matcher below.
-const AI_WORKER_URL = 'https://de-concept-map-ai.YOUR-SUBDOMAIN.workers.dev';
+const AI_WORKER_URL = 'https://de-concept-map-ai.deekshith-velmula.workers.dev';
 const AI_ENABLED = !AI_WORKER_URL.includes('YOUR-SUBDOMAIN');
 if (AI_ENABLED) {
   const introSub = document.getElementById('chat-intro-sub');

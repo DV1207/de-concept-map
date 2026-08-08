@@ -31,7 +31,7 @@ export default {
         { role: "user", content: question },
       ];
 
-      const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", { messages });
+      const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct-fast", { messages });
 
       return new Response(JSON.stringify({ answer: result.response }), {
         headers: { "Content-Type": "application/json", ...cors },
