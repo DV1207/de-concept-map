@@ -14,13 +14,23 @@ export default {
     }
 
     try {
-      const { question } = await request.json();
+      const { question, history } = await request.json();
       if (!question || typeof question !== "string") {
         return new Response(JSON.stringify({ error: "Missing question" }), {
           status: 400,
           headers: { "Content-Type": "application/json", ...cors },
         });
       }
+
+      // history is the prior turns of THIS conversation, sent by the client (the client
+      // resets it whenever a message wasn't actually answered by the model — small talk,
+      // local-KB fallback — so a follow-up like "explain simpler" always has real context).
+      // Validate defensively since this is untrusted client input.
+      const validHistory = Array.isArray(history)
+        ? history
+            .filter(m => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+            .slice(-12) // hard cap regardless of what the client sent — keeps prompt size bounded
+        : [];
 
       const SYSTEM_PROMPT = `You are a senior data engineering tutor embedded in a learning tool called "DE Concept Map". The people asking you questions are studying Apache Spark, Scala, PySpark, and Python — most commonly working data engineers with roughly 5 years of professional experience, either brushing up before an interview, debugging something in production, or filling a gap in their mental model. Calibrate every answer to that audience: skip beginner throat-clearing ("a variable is a named piece of memory..."), skip apologies and hedging, and don't pad with generic advice like "always test your code" or "performance may vary." Assume the reader already knows general programming and SQL; explain framework internals, not language basics.
 
@@ -38,6 +48,7 @@ Default to a tight, information-dense answer — roughly 100-200 words for a nor
 
       const messages = [
         { role: "system", content: SYSTEM_PROMPT },
+        ...validHistory,
         { role: "user", content: question },
       ];
 

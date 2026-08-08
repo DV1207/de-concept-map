@@ -4862,16 +4862,27 @@ function addLoadingMessage() {
   return msg;
 }
 
+// Rolling conversation history so follow-ups like "explain in simpler terms" or "what about
+// PySpark instead" have something to refer back to. Capped to the last few turns — the Worker's
+// system prompt is already sizeable, and Workers AI free-tier calls should stay lean.
+const MAX_HISTORY_TURNS = 6;
+let conversationHistory = [];
+
 async function askAI(question) {
   const res = await fetch(AI_WORKER_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question })
+    body: JSON.stringify({ question, history: conversationHistory })
   });
   if (!res.ok) throw new Error('worker responded ' + res.status);
   const data = await res.json();
   if (data.error) throw new Error(data.error);
   if (!data.answer) throw new Error('empty response');
+  conversationHistory.push({ role: 'user', content: question });
+  conversationHistory.push({ role: 'assistant', content: data.answer });
+  if (conversationHistory.length > MAX_HISTORY_TURNS * 2) {
+    conversationHistory = conversationHistory.slice(-MAX_HISTORY_TURNS * 2);
+  }
   return data.answer;
 }
 
@@ -4901,6 +4912,8 @@ async function askQuestion(text) {
   const smallTalk = detectSmallTalk(text);
   if (smallTalk) {
     renderPlainMessage(smallTalk);
+    // small talk didn't come from the model — keep it out of the follow-up thread
+    conversationHistory = [];
     return;
   }
 
@@ -4915,6 +4928,9 @@ async function askQuestion(text) {
       loadingMsg.remove();
       // fall through to the local knowledge-base matcher below — keeps the assistant
       // working even if the Worker is down, unreachable, or the daily free quota is spent
+      // (also: that fallback answer isn't from the model, so don't let a later "explain
+      // simpler" follow-up assume the model said it)
+      conversationHistory = [];
     }
   }
 
